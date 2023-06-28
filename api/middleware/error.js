@@ -1,4 +1,9 @@
 export default (err, req, res, next) => {
 	console.error(err.stack);
-	res.status(500).send(err.toString());
+
+	res.status(500).json({
+		success: false,
+		message: err.toString(),
+		type: err.type,
+	});
 };

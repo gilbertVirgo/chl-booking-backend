@@ -1,14 +1,14 @@
 import ObjectLib from "object-lib";
+import dotenv from "dotenv";
 import sheets from "../sheets.js";
+dotenv.config();
 
 const filterByQuery = (docs, query) => {
 	return docs.filter((doc) => ObjectLib.contains(doc, query));
 };
 
 export class Model {
-	constructor({ name, spreadsheetId, spreadsheetTitle }) {
-		this.name = name;
-		this.spreadsheetId = spreadsheetId;
+	constructor(spreadsheetTitle) {
 		this.spreadsheetTitle = spreadsheetTitle;
 	}
 
@@ -16,12 +16,15 @@ export class Model {
 		const {
 			data: { values },
 		} = await sheets.spreadsheets.values.get({
-			spreadsheetId: this.spreadsheetId,
+			spreadsheetId: process.env.DS_SHEET_ID,
 			range: this.spreadsheetTitle,
 		});
 
 		this.titleRow = values[0];
-		console.log(`Title row set for '${this.name}'`);
+
+		console.log(
+			`Successfully initialised model '${this.spreadsheetTitle}'`
+		);
 
 		return this;
 	}
@@ -75,7 +78,7 @@ export class Model {
 		const {
 			data: { values },
 		} = await sheets.spreadsheets.values.get({
-			spreadsheetId: this.spreadsheetId,
+			spreadsheetId: process.env.DS_SHEET_ID,
 			range,
 		});
 
@@ -85,6 +88,8 @@ export class Model {
 	}
 
 	async update(query = {}, patch) {
+		console.log({ query, patch });
+
 		if (patch.hasOwnProperty("index"))
 			throw new Error("Index is 'immutable'");
 
@@ -102,7 +107,7 @@ export class Model {
 
 		for (const doc of updatedDocs) {
 			await sheets.spreadsheets.values.update({
-				spreadsheetId: this.spreadsheetId,
+				spreadsheetId: process.env.DS_SHEET_ID,
 				range: this.getRange(doc.index),
 				valueInputOption: "USER_ENTERED",
 				resource: {
@@ -119,7 +124,7 @@ export class Model {
 			newIndex = docs.length;
 
 		await sheets.spreadsheets.values.update({
-			spreadsheetId: this.spreadsheetId,
+			spreadsheetId: process.env.DS_SHEET_ID,
 			range: this.getRange(newIndex),
 			valueInputOption: "USER_ENTERED",
 			resource: {

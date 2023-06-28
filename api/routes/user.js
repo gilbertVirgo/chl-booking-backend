@@ -4,6 +4,6 @@ export default [
 	{
 		method: "get",
 		route: "/user/:index",
-		action: (req, res) => User.find({ index: req.params.index }),
+		action: (req) => User.find({ index: req.params.index }),
 	},
 ];

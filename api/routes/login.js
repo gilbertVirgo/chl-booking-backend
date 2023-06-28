@@ -7,8 +7,6 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 
 export default async ({ body }, res, next) => {
-	console.log({ body });
-
 	const response = await User.find({ email: body.email });
 
 	if (response.length === 0)
