@@ -1,6 +1,7 @@
 import Booking from "./models/Booking.js";
 import Customer from "./models/Customer.js";
 import User from "./models/User.js";
+import boolParser from "express-query-boolean";
 import cors from "cors";
 import dotenv from "dotenv";
 import error from "./middleware/error.js";
@@ -16,6 +17,7 @@ const server = express();
 
 server.use(cors());
 server.use(express.json());
+server.use(boolParser());
 
 server.post("/login", (req, res, next) => login(req, res, next).catch(next));
 server.get("/session", isLoggedIn(true));

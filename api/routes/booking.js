@@ -1,36 +1,52 @@
 import Booking from "../models/Booking.js";
 import Customer from "../models/Customer.js";
+import { RecaptchaV3 as Recaptcha } from "express-recaptcha";
+
+const recaptcha = new Recaptcha(
+	process.env.RECAPTCHA_SITE,
+	process.env.RECAPTCHA_SECRET
+);
 
 export default [
 	{
 		method: "get",
 		route: "/booking/:index",
-		action: (req) => Booking.find({ index: req.params.index }),
+		action: (req) => Booking.findByIndex(req.params.index),
 	},
 	{
 		method: "get",
 		route: "/booking/:index/customer",
 		action: async (req) => {
-			const { customer: customer_index } = await Booking.find({
-				index: req.params.index,
-			});
-			const customer = await Customer.find({ index: customer_index });
+			const { customer: customerIndex } = await Booking.findByIndex(
+				req.params.index
+			);
+
+			const customer = await Customer.findByIndex(customerIndex);
 			return customer;
 		},
 	},
+
 	{
 		method: "get",
 		route: "/bookings",
-		action: () => Booking.find(),
+		action: (req) => Booking.find(req.query),
 	},
 	{
+		method: "get",
+		route: "/bookings/page/:pageNumber",
+		action: (req) =>
+			Booking.paginatedFind(req.query, req.params.pageNumber),
+	},
+	{
+		secure: false,
 		method: "put",
 		route: "/booking",
-		action: (req) => Booking.insert(req.body),
+		middleware: [recaptcha.middleware.verify],
+		action: async ({ body }) => Booking.methods.createFromForm(body),
 	},
 	{
 		method: "patch",
 		route: "/booking/:index",
-		action: (req) => Booking.update({ index: req.params.index }, req.body),
+		action: (req) => Booking.updateByIndex(req.params.index, req.body),
 	},
 ];

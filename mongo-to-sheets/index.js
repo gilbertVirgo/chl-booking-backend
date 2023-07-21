@@ -13,10 +13,26 @@ dotenv.config();
 
 const colFromIndex = (index) => String.fromCharCode("A".charCodeAt(0) + index);
 
-const titleRowFrom = (ds) => Object.keys(ds[0]);
-
 // Function to write the JSON data to the Google Sheet
 async function run() {
+	const {
+		data: {
+			values: [bookingTitleRow],
+		},
+	} = await sheets.spreadsheets.values.get({
+		spreadsheetId: process.env.DS_SHEET_ID,
+		range: "Booking!A1:Z1",
+	});
+
+	const {
+		data: {
+			values: [customerTitleRow],
+		},
+	} = await sheets.spreadsheets.values.get({
+		spreadsheetId: process.env.DS_SHEET_ID,
+		range: "Customer!A1:Z1",
+	});
+
 	const json = JSON.parse(
 		fs.readFileSync(path.join(getDirname(import.meta.url), "output.json"), {
 			encoding: "utf-8",
@@ -27,10 +43,10 @@ async function run() {
 		({ event, status, archived, client, dateCreated }, i) => {
 			return {
 				index: i,
-				date_of_tour: new Date(event.start.dateTime).toLocaleDateString(
+				date: new Date(event.start.dateTime).toLocaleDateString(
 					"en-GB"
 				),
-				date_created: new Date(dateCreated).toLocaleDateString("en-GB"),
+				created_at: new Date(dateCreated).toLocaleDateString("en-GB"),
 				firstname: client.firstname,
 				lastname: client.lastname,
 				email: client.email,
@@ -46,8 +62,8 @@ async function run() {
 	let bookingDS = parsed.map(
 		({
 			index,
-			date_of_tour,
-			date_created,
+			date,
+			created_at,
 			email,
 			group_size,
 			comments_or_questions,
@@ -56,8 +72,8 @@ async function run() {
 		}) => {
 			return {
 				index,
-				date_of_tour,
-				date_created,
+				potential_dates: date,
+				created_at,
 				customer_email: email,
 				group_size,
 				comments_or_questions,
@@ -85,21 +101,20 @@ async function run() {
 	});
 
 	bookingDS = bookingDS.map(
-		({ index, date_of_tour, date_created, customer_email, ...b }) => {
+		({ index, potential_dates, created_at, customer_email, ...b }) => {
 			const row =
 					customerDS.find(({ email }) => email === customer_email)
 						.index + 2,
-				customerTitleRow = titleRowFrom(customerDS),
 				firstnameCol = colFromIndex(
 					customerTitleRow.indexOf("firstname")
 				),
 				lastnameCol = colFromIndex(
 					customerTitleRow.indexOf("lastname")
-				);
+				),
 			return {
 				index,
-				date_of_tour,
-				date_created,
+				potential_dates,
+				created_at,
 				customer: `=Customer!A${row}`,
 				customer_name: `=CONCATENATE(Customer!${firstnameCol}${row}," ",Customer!${lastnameCol}${row})`,
 				...b,
@@ -118,8 +133,7 @@ async function run() {
 		concatenates it all into a comma-separated list. Groovy!
 	 */
 
-	let bookingTitleRow = titleRowFrom(bookingDS),
-		bookingIndexCol = colFromIndex(bookingTitleRow.indexOf("index")),
+	let bookingIndexCol = colFromIndex(bookingTitleRow.indexOf("index")),
 		bookingCustomerCol = colFromIndex(bookingTitleRow.indexOf("customer"));
 
 	customerDS = customerDS.map((v, i) => {

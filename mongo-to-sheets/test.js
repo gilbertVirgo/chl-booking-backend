@@ -1,8 +1,17 @@
-import fs from "fs";
-import parseMongoData from "./parse-mongo-data.js";
+import dotenv from "dotenv";
+import sheets from "../sheets.js";
+dotenv.config;
 
-fs.writeFileSync(
-	"./parsed-output.js",
-	JSON.stringify(parseMongoData("./output.json")),
-	{ encoding: "utf-8" }
-);
+async function run() {
+	const {
+		data: { values },
+	} = await sheets.spreadsheets.values.get({
+		spreadsheetId: process.env.DS_SHEET_ID,
+		range: "match(TRUE,arrayformula(isblank(Booking!A:Booking!A)),0)",
+	});
+
+	console.log({ values });
+}
+
+run();
+// Failed test
