@@ -133,3 +133,5 @@ output.csv
 output.json
 
 credentials.json
+
+*.pem
