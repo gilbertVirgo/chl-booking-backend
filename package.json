@@ -29,6 +29,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "nodemon api/index",
-		"mongo": "node mongo-to-sheets/index"
+		"mongo": "node mongo-to-sheets/index",
+		"start-server": "pm2 start api/index"
 	}
 }
