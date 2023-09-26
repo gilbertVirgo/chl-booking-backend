@@ -30,6 +30,6 @@
 	"scripts": {
 		"start": "nodemon api/index",
 		"mongo": "node mongo-to-sheets/index",
-		"start-server": "pm2 start api/index"
+		"start-server": "pm2 start api/index.js"
 	}
 }

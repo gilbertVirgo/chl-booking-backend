@@ -2,7 +2,7 @@
 
 ### To start the api server on the Digital Ocean droplet
 
-npm start-server
+npm run start-server
 
 ### For copying the old mongo database into a json file (to then be uploaded onto Google Sheets)
 
