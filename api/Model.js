@@ -1,8 +1,10 @@
 import ObjectLib from "object-lib";
+import abbreviate from "abbreviate";
 import dayjs from "dayjs";
 import dotenv from "dotenv";
-import sheets from "../sheets.js";
-import sortByDateCreated from "./helpers/sortByDateCreated.js";
+import log from "../log.js";
+import sheets from "../google/sheets.js";
+import sortByDateCreated from "../helpers/sortByDateCreated.js";
 dotenv.config();
 
 const PAGE_SIZE = 20,
@@ -22,6 +24,7 @@ const PAGE_SIZE = 20,
 export class Model {
 	constructor(spreadsheetTitle) {
 		this.spreadsheetTitle = spreadsheetTitle;
+		this.abbreviatedTitle = abbreviate(spreadsheetTitle, { length: 3 });
 		this._methods = {};
 	}
 
@@ -29,10 +32,7 @@ export class Model {
 		return this._methods;
 	}
 	set methods(methods) {
-		// console.log({ name: newMethod.name, newMethod });
-
 		this._methods = methods;
-		// this[newMethod.name] = newMethod;
 	}
 
 	async init() {
@@ -47,7 +47,8 @@ export class Model {
 
 		this.titleRow = titleRow;
 
-		console.log(
+		log(
+			"server",
 			`Successfully initialised model '${this.spreadsheetTitle}'`
 		);
 
@@ -82,7 +83,7 @@ export class Model {
 	}
 
 	getRowFromIndex(index) {
-		return index + indexDisplacement;
+		return +index + indexDisplacement;
 	}
 
 	getCellRef(index, columnTitle) {
@@ -152,14 +153,17 @@ export class Model {
 		});
 
 		const docs = (values || []).map(this.valuesToObject.bind(this));
-		let r = [];
+		let response = [];
 
 		queries.forEach((query) => {
-			r = [...r, ...docs.filter((doc) => ObjectLib.contains(doc, query))];
+			response = [
+				...response,
+				...docs.filter((doc) => ObjectLib.contains(doc, query)),
+			];
 		});
 
 		// Remove duplicates
-		return [...new Set(r)];
+		return [...new Set(response)];
 	}
 
 	async paginatedFind({ pageSize = PAGE_SIZE, ...query }, pageNumber) {

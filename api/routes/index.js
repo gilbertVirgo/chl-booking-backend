@@ -1,4 +1,5 @@
 import booking from "./booking.js";
+import createEventDescriptor from "../../helpers/createEventDescriptor.js";
 import customer from "./customer.js";
 import express from "express";
 import isLoggedIn from "../middleware/isLoggedIn.js";
@@ -15,6 +16,11 @@ routes.forEach(({ method, route, middleware = [], action, secure = true }) => {
 			Promise.resolve(action(req, res))
 				.then((data) => {
 					res.locals.data = data;
+					res.locals.eventDescriptor = createEventDescriptor({
+						method,
+						route,
+						secure,
+					});
 					next();
 				})
 				.catch(next);

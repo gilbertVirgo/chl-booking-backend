@@ -33,6 +33,12 @@ export default [
 	},
 	{
 		method: "get",
+		route: "/bookings/range/:start/:end",
+		action: async ({ params: { start, end }, query }) =>
+			Booking.methods.findInDateRange(start, end, query),
+	},
+	{
+		method: "get",
 		route: "/bookings/page/:pageNumber",
 		action: (req) =>
 			Booking.paginatedFind(req.query, req.params.pageNumber),
@@ -42,11 +48,20 @@ export default [
 		method: "put",
 		route: "/booking",
 		middleware: [recaptcha.middleware.verify],
-		action: async ({ body }) => Booking.methods.createFromForm(body),
+		action: async ({ body }) => {
+			const { index } = await Booking.methods.createFromForm(body);
+			await Booking.methods.sendNotificationEmailToCustomer(index);
+			await Booking.methods.sendNotificationEmailToAdmin(index);
+		},
 	},
 	{
 		method: "patch",
 		route: "/booking/:index",
 		action: (req) => Booking.updateByIndex(req.params.index, req.body),
+	},
+	{
+		method: "post",
+		route: "/booking/:index/calendar",
+		action: ({ params: { index } }) => Booking.methods.addToCalendar(index),
 	},
 ];

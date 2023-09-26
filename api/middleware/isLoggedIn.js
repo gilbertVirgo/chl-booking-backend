@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import log from "../../log.js";
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ export default (secure) => async (req, res, next) => {
 	try {
 		jwt.verify(token, process.env.JWT_SECRET);
 	} catch (err) {
-		console.error(err.stack);
+		log("error", err.stack);
 
 		next(TokenError);
 	}

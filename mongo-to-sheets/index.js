@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import dotenv from "dotenv";
 import fs from "fs";
 import getDirname from "../getDirname.js";
@@ -73,12 +74,12 @@ async function run() {
 			return {
 				index,
 				potential_dates: date,
-				created_at,
 				customer_email: email,
 				group_size,
 				comments_or_questions,
 				archived,
 				status,
+				created_at,
 			};
 		}
 	);
@@ -101,7 +102,7 @@ async function run() {
 	});
 
 	bookingDS = bookingDS.map(
-		({ index, potential_dates, created_at, customer_email, ...b }) => {
+		({ index, potential_dates, customer_email, ...b }) => {
 			const row =
 					customerDS.find(({ email }) => email === customer_email)
 						.index + 2,
@@ -110,11 +111,11 @@ async function run() {
 				),
 				lastnameCol = colFromIndex(
 					customerTitleRow.indexOf("lastname")
-				),
+				);
 			return {
 				index,
 				potential_dates,
-				created_at,
+				confirmed_date: "",
 				customer: `=Customer!A${row}`,
 				customer_name: `=CONCATENATE(Customer!${firstnameCol}${row}," ",Customer!${lastnameCol}${row})`,
 				...b,

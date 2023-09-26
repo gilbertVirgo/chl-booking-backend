@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import error from "./middleware/error.js";
 import express from "express";
 import isLoggedIn from "./middleware/isLoggedIn.js";
+import log from "../log.js";
 import login from "./routes/login.js";
 import ok from "./middleware/ok.js";
 import router from "./routes/index.js";
@@ -31,7 +32,7 @@ const init = async () => {
 	await Customer.init();
 
 	server.listen(process.env.PORT, () =>
-		console.log(`Listening on ${process.env.PORT} ..`)
+		log("server", `Listening on ${process.env.PORT} ..`)
 	);
 };
 

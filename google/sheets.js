@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import fs from "fs";
-import getDirname from "./getDirname.js";
+import getDirname from "../helpers/getDirname.js";
 import { google } from "googleapis";
 import path from "path";
 
