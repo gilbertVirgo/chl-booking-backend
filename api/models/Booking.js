@@ -4,6 +4,7 @@ import calendar from "../../google/calendar.js";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import dayjs from "dayjs";
 import dotenv from "dotenv";
+import log from "../../log.js";
 import notificationToAdmin from "../email-templates/notification-to-admin.js";
 import notificationToCustomer from "../email-templates/notification-to-customer.js";
 import sendEmail from "../../google/mail.js";
