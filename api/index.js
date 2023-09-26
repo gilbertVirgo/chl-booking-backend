@@ -6,6 +6,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import error from "./middleware/error.js";
 import express from "express";
+import fs from "fs";
+import https from "https";
 import isLoggedIn from "./middleware/isLoggedIn.js";
 import log from "../log.js";
 import login from "./routes/login.js";
@@ -31,9 +33,27 @@ const init = async () => {
 	await Booking.init();
 	await Customer.init();
 
-	server.listen(process.env.PORT, () =>
-		log("server", `Listening on ${process.env.PORT} ..`)
-	);
+	const { PORT } = process.env;
+
+	// Non SSL option
+	if (PORT != 443)
+		server.listen(PORT, () => log("server", `Listening on ${PORT} ..`));
+
+	// SSL option (used on deploy)
+	const { SSL_PRIVATE_KEY_PATH, SSL_CERTIFICATE_PATH } = process.env;
+
+	if (!SSL_PRIVATE_KEY_PATH || !SSL_CERTIFICATE_PATH)
+		throw new Error("SSL cert paths not specified");
+
+	https
+		.createServer(
+			{
+				key: fs.readFileSync(SSL_PRIVATE_KEY_PATH),
+				cert: fs.readFileSync(SSL_CERTIFICATE_PATH),
+			},
+			server
+		)
+		.listen(PORT);
 };
 
 init();
