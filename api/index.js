@@ -37,7 +37,9 @@ const init = async () => {
 
 	// Non SSL option
 	if (PORT != 443)
-		server.listen(PORT, () => log("server", `Listening on ${PORT} ..`));
+		return server.listen(PORT, () =>
+			log("server", `Listening on ${PORT} ..`)
+		);
 
 	// SSL option (used on deploy)
 	const { SSL_PRIVATE_KEY_PATH, SSL_CERTIFICATE_PATH } = process.env;
@@ -53,7 +55,7 @@ const init = async () => {
 			},
 			server
 		)
-		.listen(PORT);
+		.listen(PORT, log("server", `Listening on ${PORT} ..`));
 };
 
 init();
