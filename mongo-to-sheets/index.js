@@ -1,9 +1,9 @@
 import dayjs from "dayjs";
 import dotenv from "dotenv";
 import fs from "fs";
-import getDirname from "../getDirname.js";
+import getDirname from "../helpers/getDirname.js";
 import path from "path";
-import sheets from "../sheets.js";
+import sheets from "../google/sheets.js";
 
 // Some developments from today.
 // Foreign fields are now linked, meaning if the field changes on its origin
