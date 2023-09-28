@@ -87,7 +87,7 @@ Booking.methods.createFromForm = async function (body) {
 
 	let customer = (await Customer.find({ email }))[0];
 
-	if (!customer.length)
+	if (!customer)
 		customer = await Customer.methods.createFromForm({
 			firstname,
 			lastname,
