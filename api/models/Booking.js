@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import log from "../../log.js";
 import notificationToAdmin from "../email-templates/notification-to-admin.js";
 import notificationToCustomer from "../email-templates/notification-to-customer.js";
+import pad from "pad";
 import sendEmail from "../../google/mail.js";
 
 dayjs.extend(customParseFormat);
@@ -47,17 +48,38 @@ Booking.methods.addToCalendar = async function (index) {
 	if (!confirmed_date)
 		throw new Error("No confirmed date. Cannot add to calendar");
 
+	// Bit of a headache but fixes the BST problem.
+	const formatForTimezone = (dayjsDate) => {
+		const timezoneOffset = new Date().getTimezoneOffset() / 60;
+		const dateTimeString = `YYYY-MM-DD[T]HH:mm:ss`;
+
+		if (timezoneOffset === 0)
+			return dayjsDate.format(dateTimeString + "[Z]");
+
+		const operator = timezoneOffset > 0 ? "-" : "+";
+		const formattedTimezoneOffset =
+			operator + pad(2, timezoneOffset * -1, "0");
+
+		return dayjsDate.format(
+			dateTimeString + `[${formattedTimezoneOffset}]`
+		);
+	};
+
 	const response = await calendar.Events.insert(
 		process.env.GOOGLE_CALENDAR_ID,
 		{
 			start: {
-				dateTime: dayjs(confirmed_date, "DD/MM/YYYY").hour(10).format(),
+				dateTime: formatForTimezone(
+					dayjs(confirmed_date, "DD/MM/YYYY").hour(10)
+				),
 			},
 			end: {
-				dateTime: dayjs(confirmed_date, "DD/MM/YYYY").hour(16).format(),
+				dateTime: formatForTimezone(
+					dayjs(confirmed_date, "DD/MM/YYYY").hour(16)
+				),
 			},
 			summary: `LD ${customer_name} +${group_size - 1}`,
-			description: `Customer info at https://cms.christianheritagelondon.org/customer/${customer}. (This calendar event was created by the booking system)`,
+			description: `Find more info about this booking and this customer at https://cms.christianheritagelondon.org/customer/${customer}. (This calendar event was created by the booking system)`,
 		}
 	);
 
@@ -75,14 +97,15 @@ Booking.methods.createFromForm = async function (body) {
 		potential_dates,
 	} = body;
 
-	let customer =
-		(await Customer.find({ email }))[0] ||
-		(await Customer.methods.createFromForm({
+	let customer = (await Customer.find({ email }))[0];
+
+	if (!customer.length)
+		customer = await Customer.methods.createFromForm({
 			firstname,
 			lastname,
 			email,
 			phone,
-		}));
+		});
 
 	const col = {};
 	["potential_dates", "status"].forEach(
