@@ -4,6 +4,7 @@ import calendar from "../../google/calendar.js";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import dayjs from "dayjs";
 import dotenv from "dotenv";
+import isBST from "is-it-bst";
 import log from "../../log.js";
 import notificationToAdmin from "../email-templates/notification-to-admin.js";
 import notificationToCustomer from "../email-templates/notification-to-customer.js";
@@ -49,32 +50,19 @@ Booking.methods.addToCalendar = async function (index) {
 		throw new Error("No confirmed date. Cannot add to calendar");
 
 	// Bit of a headache but fixes the BST problem.
-	const formatForTimezone = (dayjsDate) => {
-		const timezoneOffset = new Date().getTimezoneOffset() / 60;
-		const dateTimeString = `YYYY-MM-DD[T]HH:mm:ss`;
-
-		if (timezoneOffset === 0)
-			return dayjsDate.format(dateTimeString + "[Z]");
-
-		const operator = timezoneOffset > 0 ? "-" : "+";
-		const formattedTimezoneOffset =
-			operator + pad(2, timezoneOffset * -1, "0");
-
-		return dayjsDate.format(
-			dateTimeString + `[${formattedTimezoneOffset}]`
-		);
-	};
+	const formatForBST = (dayjsDate) =>
+		dayjsDate.format(`YYYY-MM-DD[T]HH:mm:ss[${isBST() ? "+01:00" : "Z"}]`);
 
 	const response = await calendar.Events.insert(
 		process.env.GOOGLE_CALENDAR_ID,
 		{
 			start: {
-				dateTime: formatForTimezone(
+				dateTime: formatForBST(
 					dayjs(confirmed_date, "DD/MM/YYYY").hour(10)
 				),
 			},
 			end: {
-				dateTime: formatForTimezone(
+				dateTime: formatForBST(
 					dayjs(confirmed_date, "DD/MM/YYYY").hour(16)
 				),
 			},

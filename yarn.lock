@@ -824,6 +824,11 @@ is-generator-function@^1.0.7:
   dependencies:
     has-tostringtag "^1.0.0"
 
+is-it-bst@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/is-it-bst/-/is-it-bst-1.0.2.tgz#49d59eb9d3fc2e4ab3e28b49dac2dcb9ac332c7f"
+  integrity sha512-W/lzRqyWy7ja6nZd6ypvwlGwnd1CNxBY+2ZJJLk4UyQTXshw3crAv87d4irj+gKRf21N0VEJ7bfcylST54lXIw==
+
 is-stream@^2.0.0:
   version "2.0.1"
   resolved "https://registry.npmjs.org/is-stream/-/is-stream-2.0.1.tgz"
