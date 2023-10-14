@@ -51,7 +51,11 @@ Booking.methods.addToCalendar = async function (index) {
 
 	// Bit of a headache but fixes the BST problem.
 	const formatForBST = (dayjsDate) =>
-		dayjsDate.format(`YYYY-MM-DD[T]HH:mm:ss[${isBST() ? "+01:00" : "Z"}]`);
+		dayjsDate.format(
+			`YYYY-MM-DD[T]HH:mm:ss[${
+				isBST(dayjsDate.toDate()) ? "+01:00" : "Z"
+			}]`
+		);
 
 	const response = await calendar.Events.insert(
 		process.env.GOOGLE_CALENDAR_ID,
