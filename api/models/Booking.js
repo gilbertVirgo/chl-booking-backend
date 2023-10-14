@@ -49,6 +49,10 @@ Booking.methods.addToCalendar = async function (index) {
 	if (!confirmed_date)
 		throw new Error("No confirmed date. Cannot add to calendar");
 
+	const { firstname, lastname, email, phone } = await Customer.findByIndex(
+		customer
+	);
+
 	// Bit of a headache but fixes the BST problem.
 	const formatForBST = (dayjsDate) =>
 		dayjsDate.format(
@@ -71,7 +75,7 @@ Booking.methods.addToCalendar = async function (index) {
 				),
 			},
 			summary: `LD ${customer_name} +${group_size - 1}`,
-			description: `Find more info about this booking and this customer at https://cms.christianheritagelondon.org/customer/${customer}. (This calendar event was created by the booking system)`,
+			description: `Customer details:\nName: ${firstname} ${lastname}\nEmail: ${email}\nPhone: ${phone}\n\nFind more info about this booking and this customer at https://cms.christianheritagelondon.org/customer/${customer}. (This calendar event was created by the booking system)`,
 		}
 	);
 
